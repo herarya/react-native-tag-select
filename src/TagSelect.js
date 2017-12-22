@@ -55,8 +55,7 @@ class TagSelect extends React.Component {
 
     this.setState({ selectedItems });
 
-    console.log(this.state.selectedItems);
-    
+
     if (this.props.onItemPress) {
       return this.props.onItemPress(item);
     }
