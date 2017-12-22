@@ -8,9 +8,22 @@ import {
 import TagSelectItem from './TagSelectItem';
 
 class TagSelect extends React.Component {
+
   state = {
     selectedItems: {},
   };
+
+  componentDidMount(){
+    if(this.props.defaultSelected.length > 0){
+      const selectedItems = Object.assign(this.state.selectedItems, {});
+      this.props.defaultSelected.map((res,i)=>{
+          selectedItems[res.id] = res;
+      })
+      this.setState({ selectedItems });
+    }
+  }
+
+
 
   get totalSelected() {
     return Object.keys(this.state.selectedItems).length;
@@ -41,6 +54,8 @@ class TagSelect extends React.Component {
     }
 
     this.setState({ selectedItems });
+
+    console.log(this.state.selectedItems);
     
     if (this.props.onItemPress) {
       return this.props.onItemPress(item);
@@ -70,6 +85,7 @@ TagSelect.propTypes = {
   labelAttr: PropTypes.string,
   keyAttr: PropTypes.string,
   data: PropTypes.array,
+  defaultSelected : PropTypes.array,
   max: PropTypes.number,
   onMaxError: PropTypes.func,
   onItemPress: PropTypes.func,
@@ -83,6 +99,7 @@ TagSelect.defaultProps = {
   labelAttr: 'label',
   keyAttr: 'id',
   data: [],
+  defaultSelected : [],
   max: null,
   onMaxError: null,
   onItemPress: null,
