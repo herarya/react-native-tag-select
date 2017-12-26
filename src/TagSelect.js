@@ -23,8 +23,6 @@ class TagSelect extends React.Component {
     }
   }
 
-
-
   get totalSelected() {
     return Object.keys(this.state.selectedItems).length;
   }
@@ -60,6 +58,10 @@ class TagSelect extends React.Component {
       return this.props.onItemPress(item);
     }
   };
+
+  onClearSelected = ()=>{
+    this.setState({ selectedItems : {} });
+  }
 
   render() {
     return (
