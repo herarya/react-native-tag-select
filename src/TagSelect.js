@@ -1,121 +1,152 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React from 'react'
+import PropTypes from 'prop-types'
 import {
   View,
-  StyleSheet,
-} from 'react-native';
+  ViewPropTypes,
+  StyleSheet
+} from 'react-native'
 
-import TagSelectItem from './TagSelectItem';
+import TagSelectItem from './TagSelectItem'
 
 class TagSelect extends React.Component {
+  static propTypes = {
+    // Pre-selected values
+    value: PropTypes.array,
+
+    // Objet keys
+    labelAttr: PropTypes.string,
+    keyAttr: PropTypes.string,
+
+    // Available data
+    data: PropTypes.array,
+
+    // validations
+    max: PropTypes.number,
+
+    // Callbacks
+    onMaxError: PropTypes.func,
+    onItemPress: PropTypes.func,
+
+    // Styles
+    containerStyle: ViewPropTypes.style
+  }
+
+  static defaultProps = {
+    value: [],
+
+    labelAttr: 'label',
+    keyAttr: 'id',
+
+    data: [],
+
+    max: null,
+
+    onMaxError: null,
+    onItemPress: null,
+
+    containerStyle: {}
+  }
 
   state = {
-    selectedItems: {},
-  };
-
-  componentDidMount(){
-    if(this.props.defaultSelected.length > 0){
-      const selectedItems = Object.assign(this.state.selectedItems, {});
-      this.props.defaultSelected.map((res,i)=>{
-          selectedItems[res.id] = res;
-      })
-      this.setState({ selectedItems });
-    }
+    value: {}
   }
 
-  get totalSelected() {
-    return Object.keys(this.state.selectedItems).length;
+  componentDidMount () {
+    const value = {}
+    this.props.value.forEach((val) => {
+      value[val[[this.props.keyAttr]] || val] = val
+    })
+
+    this.setState({ value })
   }
 
-  get itemsSelected() {
-    const items = [];
-
-    Object.entries(this.state.selectedItems).forEach(([key]) => {
-      items.push(this.state.selectedItems[key]);
-    });
-
-    return items;
+  /**
+   * @description Return the number of items selected
+   * @return {Number}
+   */
+  get totalSelected () {
+    return Object.keys(this.state.value).length
   }
 
+  /**
+   * @description Return the items selected
+   * @return {Array}
+   */
+  get itemsSelected () {
+    const items = []
+
+    Object.entries(this.state.value).forEach(([key]) => {
+      items.push(this.state.value[key])
+    })
+
+    return items
+  }
+
+  /**
+   * @description Callback after select an item
+   * @param {Object} item
+   * @return {Void}
+   */
   handleSelectItem = (item) => {
-    const selectedItems = Object.assign(this.state.selectedItems, {});
-    const found = this.state.selectedItems[item[this.props.keyAttr]];
+    const key = item[this.props.keyAttr] || item
 
+    const value = { ...this.state.value }
+    const found = this.state.value[key]
+
+    // Item is on array, so user is removing the selection
     if (found) {
-      delete selectedItems[item[this.props.keyAttr]];
+      delete value[key]
     } else {
+      // User is adding but has reached the max number permitted
       if (this.props.max && this.totalSelected >= this.props.max) {
-        return this.props.onMaxError();
+        if (this.props.onMaxError) {
+          return this.props.onMaxError()
+        }
       }
 
-      selectedItems[item[this.props.keyAttr]] = item;
+      value[key] = item
     }
 
-    this.setState({ selectedItems });
-
-
-    if (this.props.onItemPress) {
-      return this.props.onItemPress(item);
-    }
-  };
-
+    return this.setState({ value }, () => {
+      if (this.props.onItemPress) {
+        this.props.onItemPress(item)
+      }
+    })
+  }
   onClearSelected = ()=>{
-    this.setState({ selectedItems : {} });
+    this.setState({ value : {} });
   }
 
-  render() {
+  render () {
     return (
-      <View style={styles.list}>
+      <View
+        style={[
+          styles.container,
+          this.props.containerStyle
+        ]}
+      >
         {this.props.data.map((i) => {
-          return(
+          return (
             <TagSelectItem
               {...this.props}
-              label={i[this.props.labelAttr]}
-              key={i[this.props.keyAttr]}
+              label={i[this.props.labelAttr] ? i[this.props.labelAttr] : i}
+              key={i[this.props.keyAttr] ? i[this.props.keyAttr] : i}
               onPress={this.handleSelectItem.bind(this, i)}
-              selected={this.state.selectedItems[i[this.props.keyAttr]] && true}
+              selected={(this.state.value[i[this.props.keyAttr]] || this.state.value[i]) && true}
             />
-            )
+          )
         })}
       </View>
-    );
+    )
   }
 }
 
-TagSelect.propTypes = {
-  labelAttr: PropTypes.string,
-  keyAttr: PropTypes.string,
-  data: PropTypes.array,
-  defaultSelected : PropTypes.array,
-  max: PropTypes.number,
-  onMaxError: PropTypes.func,
-  onItemPress: PropTypes.func,
-  itemStyle: PropTypes.any,
-  itemStyleSelected: PropTypes.any,
-  itemLabelStyle: PropTypes.any,
-  itemLabelStyleSelected: PropTypes.any,
-};
-
-TagSelect.defaultProps = {
-  labelAttr: 'label',
-  keyAttr: 'id',
-  data: [],
-  defaultSelected : [],
-  max: null,
-  onMaxError: null,
-  onItemPress: null,
-  itemStyle: {},
-  itemStyleSelected: {},
-  itemLabelStyle: {},
-  itemLabelStyleSelected: {},
-};
-
 const styles = StyleSheet.create({
-  list: {
+  container: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    alignItems: 'flex-start',
-  },
-});
+    alignItems: 'flex-start'
+  }
+})
 
-export default TagSelect;
+export default TagSelect
