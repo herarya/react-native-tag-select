@@ -17,7 +17,8 @@ class TagSelect extends React.Component {
     if(this.props.defaultSelected.length > 0){
       const selectedItems = Object.assign(this.state.selectedItems, {});
       this.props.defaultSelected.map((res,i)=>{
-          if(res.id){
+          console.log(res)
+          if(res){
             selectedItems[res.id] = res;
           }
       })
